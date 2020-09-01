@@ -1,115 +1,134 @@
 import { Button, IconButton, TextField } from "@material-ui/core/";
-import React, { useState } from "react";
+import React, { Component } from "react";
 
 import DeleteIcon from "@material-ui/icons/Delete";
+import { DragDropContext } from "react-beautiful-dnd";
 import EditIcon from "@material-ui/icons/Edit";
 import SaveIcon from "@material-ui/icons/Save";
-import useStyles from "./FavoriteLocationsWidgetStyles";
+import { nanoid } from "nanoid";
+import styles from "./FavoriteLocationsWidgetStyles";
+import { withStyles } from "@material-ui/core/styles";
 
-export default function FavoriteLocationsWidget(props) {
-	const classes = useStyles();
-	const { handleCitySearch } = props;
-	const savedFavorites = JSON.parse(window.localStorage.getItem("favorites"));
+class FavoriteLocationsWidget extends Component {
+	constructor(props) {
+		super(props);
+		const savedFavorites = JSON.parse(window.localStorage.getItem("items"));
 
-	const [favorites, setFavorites] = useState(
-		savedFavorites || [
-			"Warsaw",
-			"Opole",
-			"Gdańsk",
-			"London",
-			"Hurghada",
-			"New York",
-		]
-	);
+		this.state = savedFavorites
+			? {
+					items: [...savedFavorites],
+					edit: false,
+					addLocation: "",
+			  }
+			: {
+					items: [
+						{ id: nanoid(5), content: "Warsaw" },
+						{ id: nanoid(5), content: "Opole" },
+						{ id: nanoid(5), content: "Gdańsk" },
+						{ id: nanoid(5), content: "London" },
+						{ id: nanoid(5), content: "Hurghada" },
+						{ id: nanoid(5), content: "New York" },
+					],
+					edit: false,
+					addLocation: "",
+			  };
 
-	const [edit, setEdit] = useState(false);
-	const [addLocation, setAddLocation] = useState("");
+		this.syncLocalStorage = this.syncLocalStorage.bind(this);
+		this.removeLocation = this.removeLocation.bind(this);
+		this.handleEdit = this.handleEdit.bind(this);
+		this.handleAddLocation = this.handleAddLocation.bind(this);
+		this.handleEnterAddLocation = this.handleEnterAddLocation.bind(this);
+	}
 
-	function syncLocalStorage() {
+	syncLocalStorage() {
+		// this.setState({ edit: false });
+		window.localStorage.setItem("items", JSON.stringify(this.state.items));
 		console.log("syncLocalStorage -> syncLocalStorage");
 		//save palettes to local storage
-		window.localStorage.setItem("favorites", JSON.stringify(favorites));
 	}
 
-	function removeLocation(location) {
-		console.log("remove location", location);
-		setFavorites(favorites.filter((favorite) => favorite !== location));
+	removeLocation(location) {
+		console.log("remove location", location.id);
+		const filtered = this.state.items.filter((item) => item.id !== location.id);
+
+		console.log(filtered);
+		this.setState({ items: [...filtered] });
 	}
 
-	function handleEdit() {
+	handleEdit() {
 		console.log("clicked edit");
-		if (edit) syncLocalStorage();
-		setEdit(!edit);
+		this.setState({ edit: !this.state.edit });
+		console.log(this.state);
+		if (this.state.edit) this.syncLocalStorage();
 	}
 
-	function handleAddLocation(value) {
-		setFavorites([...favorites, value]);
-		setAddLocation("");
+	handleAddLocation(value) {
+		this.setState({
+			items: [...this.state.items, { id: nanoid(5), content: value }],
+			addLocation: "",
+		});
 	}
 
-	function handleEnterAddLocation(e) {
-		if (e.key === "Enter" && addLocation.length > 2) {
-			handleAddLocation(addLocation);
+	handleEnterAddLocation(e) {
+		if (e.key === "Enter" && this.state.addLocation.length > 2) {
+			this.handleAddLocation(this.state.addLocation);
 		}
 	}
 
-	const favLocations = favorites.map((location) => (
-		<span key={location}>
-			<Button
-				className={classes.favButton}
-				onClick={() => handleCitySearch(location)}
-				size='large'>
-				{location}
-			</Button>
-			{
-				edit && (
+	render() {
+		const { items, edit, addLocation } = this.state;
+		const { classes, handleCitySearch } = this.props;
+
+		const favLocations = items.map((location, index) => (
+			<span key={index}>
+				<Button
+					className={classes.favButton}
+					onClick={() => handleCitySearch(location.content)}
+					size='large'>
+					{location.content}
+				</Button>
+				{edit && (
 					<IconButton
-						onClick={() => removeLocation(location)}
+						onClick={() => this.removeLocation(location)}
 						className={classes.deleteIcon}>
 						<DeleteIcon className={classes.deleteIcon} />
 					</IconButton>
-				)
-				// <DeleteIcon></DeleteIcon>
-				// <span
-				// 	style={{
-				// 		height: "20px",
-				// 		color: "white",
-				// 	}}>
-				// {/* <DeleteIcon></DeleteIcon> */}
-				// </span>
-			}
-		</span>
-	));
+				)}
+			</span>
+		));
 
-	return (
-		<div className={classes.root}>
-			{favLocations}
+		return (
+			<div className={classes.root}>
+				{favLocations}
 
-			<Button
-				onClick={handleEdit}
-				variant='contained'
-				className={classes.editButton}
-				color='primary'
-				endIcon={edit ? <SaveIcon /> : <EditIcon />}>
-				{edit ? "Save" : "Edit Locations"}
-			</Button>
-			{edit && (
-				<span>
-					<TextField
-						margin='normal'
-						className={classes.textField}
-						autoFocus
-						type='input'
-						variant='outlined'
-						size='small'
-						label='Add Location'
-						value={addLocation}
-						onChange={(e) => setAddLocation(e.target.value)}
-						onKeyDown={handleEnterAddLocation}
-						helperText='Press Enter to confirm'
-					/>
-				</span>
-			)}
-		</div>
-	);
+				<Button
+					onClick={this.handleEdit}
+					variant='contained'
+					className={classes.editButton}
+					color='primary'
+					endIcon={edit ? <SaveIcon /> : <EditIcon />}>
+					{edit ? "Save" : "Edit Locations"}
+				</Button>
+				{edit && (
+					<span>
+						<TextField
+							margin='normal'
+							className={classes.textField}
+							autoFocus
+							type='input'
+							variant='outlined'
+							size='small'
+							label='Add Location'
+							value={addLocation}
+							onChange={(e) => this.setState({ addLocation: e.target.value })}
+							onKeyDown={this.handleEnterAddLocation}
+							helperText='Press Enter to confirm'
+						/>
+					</span>
+				)}
+			</div>
+		);
+	}
 }
+
+export default withStyles(styles)(FavoriteLocationsWidget);

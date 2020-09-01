@@ -1,6 +1,4 @@
-import { makeStyles } from "@material-ui/core/styles";
-
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
 	root: {
 		boxSizing: "border-box",
 		width: "100%",
@@ -46,6 +44,6 @@ const useStyles = makeStyles((theme) => ({
 	addIcon: {
 		height: "40px",
 	},
-}));
+});
 
-export default useStyles;
+export default styles;
