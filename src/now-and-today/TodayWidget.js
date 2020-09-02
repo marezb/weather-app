@@ -104,11 +104,7 @@ function TodayWidget({
 						Wind Speed: {Math.round(windSpeed * 3.6 * 10) / 10} km/h
 					</Typography>
 					<Typography align='left'>
-						{rain
-							? `Rain: ${rain} mm/h`
-							: snow
-							? `Snow: ${snow} mm/h`
-							: null}
+						{rain ? `Rain: ${rain} mm/h` : snow ? `Snow: ${snow} mm/h` : null}
 					</Typography>
 				</Typography>
 			</div>

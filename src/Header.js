@@ -198,7 +198,7 @@ export default function Header(props) {
 							onClick={() => setValue(0)}>
 							<img
 								className={classes.icon}
-								src={require(`./icons/logo2.png`)}
+								src={require(`./icons/logobw.png`)}
 								alt='logo'
 							/>
 						</Button>

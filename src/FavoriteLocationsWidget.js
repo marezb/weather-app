@@ -1,10 +1,10 @@
-import { Button, IconButton, TextField } from "@material-ui/core/";
+import { Button, TextField, Typography } from "@material-ui/core/";
 import React, { Component } from "react";
 
-import DeleteIcon from "@material-ui/icons/Delete";
-import { DragDropContext } from "react-beautiful-dnd";
+import DraggableFavoriteLocationsList from "./DraggableFavoriteLocationsList";
 import EditIcon from "@material-ui/icons/Edit";
 import SaveIcon from "@material-ui/icons/Save";
+import arrayMove from "array-move";
 import { nanoid } from "nanoid";
 import styles from "./FavoriteLocationsWidgetStyles";
 import { withStyles } from "@material-ui/core/styles";
@@ -12,16 +12,16 @@ import { withStyles } from "@material-ui/core/styles";
 class FavoriteLocationsWidget extends Component {
 	constructor(props) {
 		super(props);
-		const savedFavorites = JSON.parse(window.localStorage.getItem("items"));
+		const savedFavorites = JSON.parse(window.localStorage.getItem("locations"));
 
 		this.state = savedFavorites
 			? {
-					items: [...savedFavorites],
+					locations: [...savedFavorites],
 					edit: false,
 					addLocation: "",
 			  }
 			: {
-					items: [
+					locations: [
 						{ id: nanoid(5), content: "Warsaw" },
 						{ id: nanoid(5), content: "Opole" },
 						{ id: nanoid(5), content: "Gdańsk" },
@@ -40,19 +40,31 @@ class FavoriteLocationsWidget extends Component {
 		this.handleEnterAddLocation = this.handleEnterAddLocation.bind(this);
 	}
 
+	onSortEnd = ({ oldIndex, newIndex }) => {
+		this.setState(({ locations }) => ({
+			locations: arrayMove(locations, oldIndex, newIndex),
+		}));
+		this.syncLocalStorage();
+	};
+
 	syncLocalStorage() {
 		// this.setState({ edit: false });
-		window.localStorage.setItem("items", JSON.stringify(this.state.items));
+		window.localStorage.setItem(
+			"locations",
+			JSON.stringify(this.state.locations)
+		);
 		console.log("syncLocalStorage -> syncLocalStorage");
 		//save palettes to local storage
 	}
 
 	removeLocation(location) {
 		console.log("remove location", location.id);
-		const filtered = this.state.items.filter((item) => item.id !== location.id);
+		const filtered = this.state.locations.filter(
+			(item) => item.id !== location.id
+		);
 
 		console.log(filtered);
-		this.setState({ items: [...filtered] });
+		this.setState({ locations: [...filtered] });
 	}
 
 	handleEdit() {
@@ -64,7 +76,7 @@ class FavoriteLocationsWidget extends Component {
 
 	handleAddLocation(value) {
 		this.setState({
-			items: [...this.state.items, { id: nanoid(5), content: value }],
+			locations: [...this.state.locations, { id: nanoid(5), content: value }],
 			addLocation: "",
 		});
 	}
@@ -76,30 +88,20 @@ class FavoriteLocationsWidget extends Component {
 	}
 
 	render() {
-		const { items, edit, addLocation } = this.state;
+		const { locations, edit, addLocation } = this.state;
 		const { classes, handleCitySearch } = this.props;
-
-		const favLocations = items.map((location, index) => (
-			<span key={index}>
-				<Button
-					className={classes.favButton}
-					onClick={() => handleCitySearch(location.content)}
-					size='large'>
-					{location.content}
-				</Button>
-				{edit && (
-					<IconButton
-						onClick={() => this.removeLocation(location)}
-						className={classes.deleteIcon}>
-						<DeleteIcon className={classes.deleteIcon} />
-					</IconButton>
-				)}
-			</span>
-		));
 
 		return (
 			<div className={classes.root}>
-				{favLocations}
+				<DraggableFavoriteLocationsList
+					distance={10}
+					locations={locations}
+					removeLocation={this.removeLocation}
+					handleCitySearch={handleCitySearch}
+					axis='xy'
+					onSortEnd={this.onSortEnd}
+					edit={edit}
+				/>
 
 				<Button
 					onClick={this.handleEdit}
@@ -122,7 +124,7 @@ class FavoriteLocationsWidget extends Component {
 							value={addLocation}
 							onChange={(e) => this.setState({ addLocation: e.target.value })}
 							onKeyDown={this.handleEnterAddLocation}
-							helperText='Press Enter to confirm'
+							helperText='At least 3 letters. Press Enter to confirm. Locations are draggable. You can change their order.'
 						/>
 					</span>
 				)}

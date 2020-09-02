@@ -23,7 +23,7 @@ const theme = createMuiTheme({
 		},
 	},
 	typography: {
-		fontSize: 12,
+		fontSize: 13,
 		tab: {
 			textTransform: "none",
 			fontWeight: 400,

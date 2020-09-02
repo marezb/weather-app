@@ -1,30 +1,15 @@
 const styles = (theme) => ({
 	root: {
+		display: "flex",
+		flexWrap: "wrap",
+		alignItems: "flex-start",
+		alignContent: "center",
+
 		boxSizing: "border-box",
 		width: "100%",
 		padding: "0rem",
 	},
-	deleteIcon: {
-		height: "20px",
-		padding: "0px",
-		color: "#b5bbbf",
-		"&:hover svg": {
-			transition: "all 0.5s ease-in-out",
-			color: "#de4536",
-			transform: "scale(1.4)",
-		},
-	},
-	favButton: {
-		textTransform: "none",
-		// padding: "1rem",
-		fontSize: "1.1rem",
-		fontWeight: 400,
-		transition: "all .5s ease-in-out",
-		"&:hover": {
-			transform: "scale(1.2)",
-			backgroundColor: "transparent",
-		},
-	},
+
 	inactive: {
 		color: "white",
 		padding: "0px",
@@ -40,9 +25,16 @@ const styles = (theme) => ({
 	textField: {
 		margin: theme.spacing(1),
 		width: "20rem",
+		alignSelf: "flex-end",
 	},
 	addIcon: {
 		height: "40px",
+	},
+	infoDraggable: {
+		margin: "1rem",
+		width: "10rem",
+		fontSize: ".7rem",
+		alignSelf: "center",
 	},
 });
 

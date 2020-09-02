@@ -7,7 +7,7 @@ import useStyles from "./LocationAndSearchStyles";
 
 function LocationAndSearch(props) {
 	const classes = useStyles();
-	const { handleCitySearch, geoLocation, locationInput, address } = props;
+	const { handleCitySearch, geoLocation, address } = props;
 	const [locationInputLocal, setLocationInputLocal] = useState("");
 
 	function handleSearch(e) {
@@ -38,11 +38,7 @@ function LocationAndSearch(props) {
 				color='primary'
 				className={classes.button}
 				endIcon={
-					locationInputLocal.length > 2 ? (
-						<SearchIcon />
-					) : (
-						<LocationOnIcon />
-					)
+					locationInputLocal.length > 2 ? <SearchIcon /> : <LocationOnIcon />
 				}
 				onClick={() =>
 					locationInputLocal.length < 3
